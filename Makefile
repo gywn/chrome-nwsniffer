@@ -5,7 +5,7 @@ ICON = pig_nose_16_0.png pig_nose_16_1.png pig_nose_16_2.png pig_nose_16_3.png \
 
 LIB = jquery-2.0.3.min.js
 
-all: clear copyfiles copylibfiles
+all: clear copyfiles copylibfiles compress
 
 clear: 
 	if [ -d dist ]; then rm -r dist; fi
@@ -17,6 +17,10 @@ copyfiles: $(SRC:%=src/%) $(ICON:%=icon/%)
 copylibfiles: $(LIB:%=lib/%)
 	mkdir dist/lib
 	cp $^ dist/lib
+
+compress:
+	rm dist.zip
+	zip -r dist.zip dist/*
 
 src/extension.css: src/extension.scss
 	sass $< $@
