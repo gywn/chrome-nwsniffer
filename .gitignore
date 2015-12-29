@@ -1,8 +1,5 @@
 .*
 !.gitignore
 
-*.css.map
-*.css
-
 commit_msg.txt
 todo.md

@@ -72,8 +72,11 @@
     chrome.runtime.onConnect.addListener(connectToFrontEnd);
 
     function setIcon() {
-        // TODO: change icon according to number of tab sniffed
-        var icon = tabIds.length > 0 ? 'active_1383664333_wifi_network.png' : '1383664333_wifi_network.png';
+        if (tabIds.length < 5) {
+            var icon = 'pig_nose_16_' + tabIds.length.toString() + '.png';
+        } else {
+            var icon = 'pig_nose_16_+.png';
+        }
 
         chrome.browserAction.setIcon({
             'path': chrome.extension.getURL(icon)
