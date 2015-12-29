@@ -1,0 +1,198 @@
+// Dark Orange Theme
+// $details_c1: #FFCCBC;
+// $details_c2: #FFAB91;
+// $details_c3: #FF3D00;
+// $details_c4: #DD2C00;
+// $details_c5: #BF360C;
+
+// Attention Attraction Free Theme (Blue Grey)
+$details_c1: #CFD8DC; /* light background */
+$details_c2: #B0BEC5; /* dark/panel background */
+$details_c3: #78909C; /* highlight surface */
+$details_c4: #546E7A; /* highlight outline */
+$details_c5: #37474F; /* text */
+
+body {
+  margin: 0;
+  padding: 20px;
+
+  #control_wrapper {
+    overflow: scroll;
+    white-space: nowrap;
+
+    a, b, input, span {
+      display: inline-block;
+      vertical-align: top;
+      font-size: 14px;
+      line-height: 20px;
+      font-family: 'Avenir', 'Arial', sans-serif;
+    }
+
+    a {
+        margin-right: 10px;
+        padding: 7px 11px;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: default;
+
+        &.active_button {
+            border: 1px solid #2979FF;
+            background-color: #448AFF;
+            color: white;
+        }
+
+        &.non_active_button {
+            border: 1px solid #CFD8DC;
+            background-color: #ECEFF1;
+            color: #CFD8DC;
+        }
+    }
+
+    b {
+      padding: 7px 13px;
+      border: 1px solid #2979FF;
+      border-right-width: 0;
+      background-color: #E3F2FD;
+      color: #2979FF;
+    }
+
+    input#filter {
+      padding: 7px 10px;
+      width: 200px;
+      border: 1px solid #2979FF;
+      border-left-width: 0;
+
+      &:focus {
+        outline: none;
+        box-shadow: inset 0px 0px 0px 3px #E3F2FD;
+      }
+    }
+
+    span#info {
+        padding: 8px 0;
+        margin-left: 10px;
+        color: #B0BEC5;
+        font-weight: bold;
+    }
+
+    span#error {
+        padding: 8px 0;
+        margin-left: 10px;
+        color: #D50000;
+        font-weight: bold;
+    }
+  }
+
+  td, th {
+    padding: 6px;
+    // border-left: 2px solid white;
+    border-right: 2px solid white;
+
+    // &:first-child { border-left: 0; }
+    &:last-child { border-right: 0; }
+
+    a { text-decoration : none; }
+
+    &.col_requestId { width: 7ex; }
+    &.col_statusCode { width: 5ex; }
+    &.col_ip { width: 15ex; }
+    &.col_url { 
+      overflow: scroll;
+      // text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    &.col_type { width: 15ex; }
+    &.col_timeStamp { width: 20ex; }
+    &.col_tabId { width: 5ex; }
+    &.col_fromCache { width: 10ex; }
+    &.col_method { width: 5ex; }
+
+    &.col_requestId, &.col_statusCode, &.col_ip, &.col_url, &.col_type,
+    &.col_timeStamp, &.col_tabId, &.col_fromCache, &.col_method, 
+    {
+      font-family: 'Menlo', 'Consolas', monospace;
+    }
+  }
+
+  table#req_header_row {
+    margin-top: 20px;
+    width: 100%;
+    table-layout: fixed; /* First calculate total width, then each td */
+    border-spacing: 0;
+    border-collapse: collapse;
+    background-color: #2196F3;
+
+    th { color: white; }
+  }
+
+  #req_table_wrapper {
+    max-height: 200px;
+    overflow: scroll;
+
+    table#req_table {
+      width: 100%;
+      table-layout: fixed; /* First calculate total width, then each td */
+      border-spacing: 0;
+      border-collapse: collapse;
+
+      tr {
+        cursor: default;
+
+        &:hover { font-weight: bold; }
+        &:nth-child(even) { background-color: #E3F2FD; }
+        &:nth-child(odd) { background-color: #BBDEFB; }
+
+        &.row_waiting { background-color: #FFF9C4; }
+        &.row_transfering { background-color: #C8E6C9; }
+        &.row_completed {  }
+
+        &.row_highlighted {
+          color: white              !important;
+          background-color: $details_c3 !important;
+          font-weight: bold         !important;
+        }
+      }
+    }
+  }
+
+  .req_download_panel {
+    margin-top: 20px;
+    padding: 5px;
+    background-color: $details_c2;
+    overflow: scroll;
+    white-space: nowrap;
+
+    input.filename {
+      padding: 5px 7px;
+      width: 600px;
+      font-size: 12px;
+      border: 1px solid $details_c4;
+
+      &:focus {
+        outline: none;
+        border-color: $details_c2;
+      }
+    }
+
+    a.button {
+      display: inline-block;
+      padding: 5px 10px;
+      margin-left: 10px;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+      font-size: 12px;
+      border: 1px solid $details_c4;
+      background-color: $details_c3;
+    }
+  }
+
+  .req_details {
+    padding: 7px 10px 10px 10px;
+    background-color: $details_c1;
+    font-family: 'Menlo', 'Consolas', monospace;
+    color: $details_c5;
+    word-break: break-all;
+  }
+}
+

@@ -1,0 +1,17 @@
+{
+   "background": {
+      "scripts": [ "background.js" ]
+   },
+   "browser_action": {
+      "default_icon": "1383664333_wifi_network.png",
+      "default_title": "Requests Sniffer"
+   },
+   "description": "see all your network traffic in one place.",
+   "icons": {
+      "128": "active_1383664333_wifi_network.png"
+   },
+   "manifest_version": 2,
+   "name": "Requests Sniffer",
+   "permissions": [ "tabs", "*://*/*", "webRequest", "storage" ],
+   "version": "1.0.0"
+}
