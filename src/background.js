@@ -40,7 +40,7 @@
         // port.name is the tabId to sniff (in string)
         var id = parseInt(port.name);
 
-        if (tabIds.length == 0) {
+        if (tabIds.length === 0) {
             webRequestListenerOn();
         }
 
@@ -52,7 +52,7 @@
         } else {
             ports[id] = port;
             tabIds.push(id);
-            port.onDisconnect.addListener(disconnectFromFrontEnd)
+            port.onDisconnect.addListener(disconnectFromFrontEnd);
             setIcon();
         }
     }
@@ -64,7 +64,7 @@
         delete ports[disconnect_id];
         setIcon();
 
-        if (tabIds.length == 0) {
+        if (tabIds.length === 0) {
             webRequestListenerOff();
         }
     }
@@ -72,10 +72,11 @@
     chrome.runtime.onConnect.addListener(connectToFrontEnd);
 
     function setIcon() {
+        var icon = null;
         if (tabIds.length < 5) {
-            var icon = 'pig_nose_16_' + tabIds.length.toString() + '.png';
+            icon = 'pig_nose_16_' + tabIds.length.toString() + '.png';
         } else {
-            var icon = 'pig_nose_16_+.png';
+            icon = 'pig_nose_16_+.png';
         }
 
         chrome.browserAction.setIcon({

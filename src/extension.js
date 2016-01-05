@@ -5,7 +5,7 @@
     var tabTitle;
     // There is no limit to captured requests, but there is limit on UI table
     // size (for refresh speed consideration).
-    var rowMaximum = 1000
+    var rowMaximum = 1000;
 
     // DOM
     var autoSelectBtn;
@@ -39,7 +39,7 @@
         // statusCode: {title: 'st'}
         // ip: {title: 'IP'},
         // timeStamp: {title: 'timestamp'},
-    }
+    };
 
     function init() {
         var str_id = /tabId=(\d+)/.exec(window.location)[1];
@@ -50,7 +50,7 @@
             if (tab_id == tabId /*&& tab.status == 'complete'*/) {
                 tabTitle = tab.title;
                 document.title = '🐽' + tabTitle;
-                if (info.favIconUrl) 
+                if (info.favIconUrl)
                     $('#favicon').attr({ href: info.favIconUrl });
             }
         });
@@ -66,13 +66,13 @@
 
         // chrome.storage.local.get is asynchronous
         chrome.storage.local.get('filter', function(data){
-            filterInput.val(data['filter']);
+            filterInput.val(data.filter);
             filterChanged();
         });
         filterInput.on('input', filterChanged);
 
         var table_header = $('#req_header_row tr');
-        for (i in columnProps) {
+        for (var i in columnProps) {
             table_header.append('<th class=col_' + i + '>' + columnProps[i].title);
         }
 
@@ -122,11 +122,11 @@
 
     // A list of cumulated request Id, not longer than recordsLimit.
     // requestIds = [ requestId, etc. ]
-    var requestIds = []
+    var requestIds = [];
 
     // requestsData = {
     //     requestId: {
-    //         url: url of history[-1].url, for filtering 
+    //         url: url of history[-1].url, for filtering
     //         lastStatus : 'waiting'|'transfering'|'completed',
     //         row: a Jquery <tr> object,
     //         history : [ req_details, etc. ]
@@ -134,7 +134,7 @@
     //     }
     //     etc.
     // }
-    var requestsData = {}
+    var requestsData = {};
 
     function updateRequestsData(type, req_details) {
         var req_id = req_details.requestId;
@@ -144,10 +144,10 @@
             id: req_id,
             class: 'row_' + type
         });
-        for (i in columnProps) {
+        for (var i in columnProps) {
             var cell = $('<td>' + req_details[i] + '</td>').attr({ class: 'col_' + i });
             row.append(cell);
-        };
+        }
 
         // Put <tr> object into requestsData and requestIds properly
         var req_data = requestsData[req_id];
@@ -197,10 +197,10 @@
 
         // Display <tr> object
         // Prefer to display long/important request results
-        if ((filterQ == null && !(req_data.lastStatus == 'completed' &&
+        if ((filterQ === null && !(req_data.lastStatus == 'completed' &&
                         his[his.length-1].timeStamp -
-                        his[his.length-2].timeStamp < 2000)) || (filterQ != null
-                        && filterQ(req_data.url)))
+                        his[his.length-2].timeStamp < 2000)) || (filterQ !== null &&
+                        filterQ(req_data.url)))
         {
             req_data.row.prependTo(requestsTable);
             // Reselect req_id if it was/is being selected
@@ -219,7 +219,7 @@
         //    -a       a      removeClass(a) + addClass(a) +  updateDetails(a)
         //    -a      -b      <undefined behavior>
         //    -a       b      removeClass(a) + addClass(b) +  updateDetails(a)
-        //     a      -a      removeClass(a) + updateDetails(-a) 
+        //     a      -a      removeClass(a) + updateDetails(-a)
         //     a       a      removeClass(a) + addClass(a) + updateDetails(a)
         //     a      -b      <undefined behavior>
         //     a       b      removeClass(a) + addClass(b) + updateDetails(b)
@@ -258,7 +258,7 @@
     function tryAutoSelectSingleRow() {
         if (autoSelectSingleRow) {
             var rows = requestsTable.find('tr');
-            if (rows.length == 1) 
+            if (rows.length == 1)
                 selectRequestIdRow(rows.first().attr('id'));
         }
     }
@@ -273,11 +273,11 @@
         var detail_type; /* unused */
 
         req_data.history.forEach(function(req_details) {
-            if (req_details['requestHeaders']) 
+            if (req_details.requestHeaders)
                 prependRequestBlock(req_details);
-            else if (req_details['responseHeaders']) 
+            else if (req_details.responseHeaders)
                 prependResponseBlock(req_details);
-            else 
+            else
                 prependCompletedBlock(req_details);
         });
     }
@@ -290,7 +290,7 @@
 
         // Construct partial aria2c command
         var aria2c_file = url + "\n";
-        req_details['requestHeaders'].forEach(function(header) {
+        req_details.requestHeaders.forEach(function(header) {
             aria2c_file += ' header=' + header.name + ': ' + header.value + "\n";
         });
         aria2c_file += ' out=';
@@ -330,7 +330,7 @@
 
         req_block
             .append(req_details.url + '<br/><br/>');
-        req_details['requestHeaders'].forEach(function(header) {
+        req_details.requestHeaders.forEach(function(header) {
             req_block.append('<b>' + header.name + ':</b> ' + header.value + '<br/>');
         });
     }
@@ -347,7 +347,7 @@
             ext = /[^?]*\/([^\/?]+)(\?|$)/.exec(url);
             ext = ext ? ' - ' + ext[1] : '';
         } else {
-            ext = /[^?]*(\.[^\/?]+)(\?|$)/.exec(url); 
+            ext = /[^?]*(\.[^\/?]+)(\?|$)/.exec(url);
             ext = ext ? ext[1] : '';
         }
 
@@ -366,9 +366,9 @@
         // filter machanism can be complicated, pre-compile it into a callable
         var token_list = filterInput.val().split(/\s+/)
             .filter(function(token){
-                return token != '';
+                return token !== '';
             });
-        if (token_list.length == 0) {
+        if (token_list.length === 0) {
             filterQ = null;
         } else {
             filterQ = function(url) {
@@ -376,12 +376,12 @@
                 token_list.forEach(function(token) {
                     matched = url.indexOf(token) > -1 && matched;
                 });
-                return matched
+                return matched;
             };
         }
 
         // Use .detach() to keep event handler of rows
-        requestsTable.find('tr').detach(); 
+        requestsTable.find('tr').detach();
         detailsWrapper.empty();
 
         requestIds.slice(-rowMaximum).forEach(function(req_id) {
