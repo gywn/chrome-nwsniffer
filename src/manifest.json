@@ -14,5 +14,5 @@
    "manifest_version": 2,
    "name": "Network Sniffer",
    "permissions": [ "tabs", "*://*/*", "webRequest", "storage" ],
-   "version": "1.0.0"
+   "version": "1.1.0"
 }

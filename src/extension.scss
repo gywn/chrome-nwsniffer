@@ -34,6 +34,7 @@ body {
         text-decoration: none;
         font-weight: bold;
         cursor: default;
+        transition: border-color 0.1s, background-color 0.1s, color 0.1s;
 
         &.active_button {
             border: 1px solid #2979FF;
@@ -54,17 +55,36 @@ body {
       border-right-width: 0;
       background-color: #E3F2FD;
       color: #2979FF;
+      cursor: default;
+    }
+
+    b span.help {
+      height: 20px;
+      width: 0;
+      background: transparent url('help.svg') right no-repeat;
+      transition: width 0.1s;
+    }
+
+    b:hover span.help {
+      width: 21px;
     }
 
     input#filter {
       padding: 7px 10px;
-      width: 200px;
+      width: 275px;
       border: 1px solid #2979FF;
       border-left-width: 0;
+      font-size: 12px;
+      font-family: 'Menlo', 'Consolas', monospace;
 
       &:focus {
         outline: none;
         box-shadow: inset 0px 0px 0px 3px #E3F2FD;
+      }
+
+      &.error {
+        color: #F80000;
+        font-weight: bold;
       }
     }
 
@@ -96,7 +116,7 @@ body {
     &.col_requestId { width: 7ex; }
     &.col_statusCode { width: 5ex; }
     &.col_ip { width: 15ex; }
-    &.col_url { 
+    &.col_url {
       overflow: scroll;
       // text-overflow: ellipsis;
       white-space: nowrap;
@@ -108,7 +128,7 @@ body {
     &.col_method { width: 5ex; }
 
     &.col_requestId, &.col_statusCode, &.col_ip, &.col_url, &.col_type,
-    &.col_timeStamp, &.col_tabId, &.col_fromCache, &.col_method, 
+    &.col_timeStamp, &.col_tabId, &.col_fromCache, &.col_method,
     {
       font-family: 'Menlo', 'Consolas', monospace;
     }
@@ -126,7 +146,7 @@ body {
   }
 
   #req_table_wrapper {
-    max-height: 200px;
+    max-height: 195px;  /* 7.5 row */
     overflow: scroll;
 
     table#req_table {
@@ -142,7 +162,10 @@ body {
         &:nth-child(even) { background-color: #E3F2FD; }
         &:nth-child(odd) { background-color: #BBDEFB; }
 
-        &.row_waiting { background-color: #FFF9C4; }
+        &.row_waiting {
+          color: $details_c3;
+          background-color: white;
+        }
         &.row_transfering { background-color: #C8E6C9; }
         &.row_completed {  }
 
@@ -184,6 +207,19 @@ body {
       font-size: 12px;
       border: 1px solid $details_c4;
       background-color: $details_c3;
+    }
+
+    a.button.aria2c_mt {
+      width: 5px;
+      margin-left: 0;
+      border-left: none;
+      cursor: default;
+      background: $details_c3 url('aria2c_mt.svg') 0 no-repeat;
+      transition: background-position 0.1s;
+    }
+
+    a.button.aria2c_mt.enabled {
+      background-position: -25px;
     }
   }
 

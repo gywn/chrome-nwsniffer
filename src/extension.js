@@ -1,4 +1,7 @@
+/* jshint esversion: 6 */
+/* global chrome, $ */
 (function($) {
+    'use strict';
     // Tab with tabId is sniffed by this copy of extension
     var tabId;
     // title of watching tab
@@ -30,16 +33,16 @@
     var autoSelectSingleRow;
 
     // Columns information
-    var columnProps = {
-        // tabId: {title: 'tab'},
-        requestId: {title: 'reqId'},
-        type: {title: 'type'},
-        url: {title: 'URL'},
-        // method: {title: 'mt'},
+    var columnProps = [
+        // ['tabId', {title: 'Id'}],
+        ['requestId', {title: 'reqId'}],
+        ['type', {title: 'type'}],
+        ['url', {title: 'URL'}],
+        // ['method', {title: 'mt'}],
         // statusCode: {title: 'st'}
-        // ip: {title: 'IP'},
-        // timeStamp: {title: 'timestamp'},
-    };
+        // ['ip', {title: 'IP'}],
+        // ['timeStamp', {title: 'timestamp'}],
+    ];
 
     function init() {
         var str_id = /tabId=(\d+)/.exec(window.location)[1];
@@ -47,7 +50,7 @@
 
         // Copy title and favicon from sniffed tab whenever it's updated.
         chrome.tabs.onUpdated.addListener(function(tab_id, info, tab) {
-            if (tab_id == tabId /*&& tab.status == 'complete'*/) {
+            if (tab_id === tabId /*&& tab.status == 'complete'*/) {
                 tabTitle = tab.title;
                 document.title = '🐽' + tabTitle;
                 if (info.favIconUrl)
@@ -64,6 +67,11 @@
         autoSelectBtn.click(autoSelectSingleRowToggle);
         autoSelectSingleRowOn();
 
+        $('#filter_help').click(() => {
+            filterInput.val('type:object url:\\.(mp4|flv|ts)($|\\?)');
+            filterChanged();
+        });
+
         // chrome.storage.local.get is asynchronous
         chrome.storage.local.get('filter', function(data){
             filterInput.val(data.filter);
@@ -72,9 +80,8 @@
         filterInput.on('input', filterChanged);
 
         var table_header = $('#req_header_row tr');
-        for (var i in columnProps) {
-            table_header.append('<th class=col_' + i + '>' + columnProps[i].title);
-        }
+        columnProps.forEach(([fld, prop]) =>
+                table_header.append('<th class=col_' + fld + '>' + prop.title));
 
         // Building a connection between extension.js and background.js:
         // extension.js fires a connection, background.js catches onConnect
@@ -109,7 +116,7 @@
     // }
 
     function sortBackendMessage(msg) {
-        if (msg.type == 'extensionError') {
+        if (msg.type === 'extensionError') {
             updateError(msg.detail);
         } else {
             updateRequestsData(msg.type, msg.req_details);
@@ -126,12 +133,12 @@
 
     // requestsData = {
     //     requestId: {
-    //         url: url of history[-1].url, for filtering
     //         lastStatus : 'waiting'|'transfering'|'completed',
     //         row: a Jquery <tr> object,
-    //         history : [ req_details, etc. ]
+    //         history : [ req_details, etc. ],
+    //         shortRequest : true|false,
     //         etc.
-    //     }
+    //     },
     //     etc.
     // }
     var requestsData = {};
@@ -144,16 +151,15 @@
             id: req_id,
             class: 'row_' + type
         });
-        for (var i in columnProps) {
-            var cell = $('<td>' + req_details[i] + '</td>').attr({ class: 'col_' + i });
+        columnProps.forEach(([fld, prop]) => {
+            var cell = $('<td>' + req_details[fld] + '</td>').attr({ class: 'col_' + fld });
             row.append(cell);
-        }
+        });
 
         // Put <tr> object into requestsData and requestIds properly
         var req_data = requestsData[req_id];
         if (!req_data) {
             req_data = requestsData[req_id] = {
-                url: req_details.url,
                 lastStauts: type,
                 row: row,
                 history: [req_details]
@@ -167,12 +173,13 @@
             //     delete requestsData[last_req_id];
             // }
         } else {
-            req_data.url = req_details.url;
             req_data.lastStatus = type;
             // Remove row before re-insert it, otherwise it's duplicated.
             req_data.row.remove();
             req_data.row = row;
-            req_data.history.push(req_details);
+            var his = req_data.history;
+            his.push(req_details);
+            req_data.shortRequest = his[his.length-1].timeStamp - his[his.length-2].timeStamp < 2000;
         }
 
         row.click(function(e) {
@@ -197,17 +204,15 @@
 
         // Display <tr> object
         // Prefer to display long/important request results
-        if ((filterQ === null && !(req_data.lastStatus == 'completed' &&
-                        his[his.length-1].timeStamp -
-                        his[his.length-2].timeStamp < 2000)) || (filterQ !== null &&
-                        filterQ(req_data.url)))
+        if ((filterQ === null && !(req_data.lastStatus === 'completed' && req_data.shortRequest)) ||
+                (filterQ !== null && filterQ(req_data)))
         {
             req_data.row.prependTo(requestsTable);
             // Reselect req_id if it was/is being selected
-            if (Math.abs(selectedRequestId) == req_id)
+            if (Math.abs(selectedRequestId) === req_id)
                 selectRequestIdRow(req_id);
         } else {
-            if (selectedRequestId == req_id)
+            if (selectedRequestId === req_id)
                 selectRequestIdRow(-req_id);
         }
     }
@@ -258,7 +263,7 @@
     function tryAutoSelectSingleRow() {
         if (autoSelectSingleRow) {
             var rows = requestsTable.find('tr');
-            if (rows.length == 1)
+            if (rows.length === 1)
                 selectRequestIdRow(rows.first().attr('id'));
         }
     }
@@ -289,11 +294,17 @@
         var url = req_details.url;
 
         // Construct partial aria2c command
-        var aria2c_file = url + "\n";
+        var aria2c_file = url + '\n';
         req_details.requestHeaders.forEach(function(header) {
-            aria2c_file += ' header=' + header.name + ': ' + header.value + "\n";
+            aria2c_file += ' header=' + header.name + ': ' + header.value + '\n';
         });
-        aria2c_file += ' out=';
+
+        // Multi-thread downloading for Aria2c
+        var multi_th = req_details.type === 'object';
+        var multi_th_end =
+            ' min-split-size=1M\n' +
+            ' split=16\n' +
+            ' max-connection-per-server=16\n';
 
         // Build DOM
         var input = $('<input></input>').attr({
@@ -301,14 +312,29 @@
             class: 'filename',
             value: guessFileName(tabTitle, url)
         });
-        var open_btn = $('<a>Open</a>').attr({ class: 'button', href: url, target: '_blank' });
-        var download_btn = $('<a>Download</a>').attr({ class: 'button' });
-        var aria2c_btn = $('<a>Aria2c</a>').attr({ class: 'button' });
+        var open_btn = $('<a>Open</a>').attr({
+            class: 'button',
+            href: url,
+            target: '_blank',
+            title: 'Open in a new page'
+        });
+        var download_btn = $('<a>Download</a>').attr({
+            class: 'button',
+            title: 'Download the file'
+        });
+        var aria2c_btn = $('<a>Aria2c</a>').attr({
+            class: 'button',
+            title: 'Download as Aria2c file'
+        });
+        var aria2c_mt_btn = $('<a>&nbsp;</a>').attr({
+            class: 'button aria2c_mt',
+            title: 'Toggle Aria2c multi-thread downloading'
+        });
 
-        input.on('input', function(e) {
+        var generate_links = () => {
             var fn = input.val();
             var aria2c_file_inline = 'data:text/plain;charset=utf-8,' +
-                encodeURIComponent(aria2c_file + fn);
+                encodeURIComponent(aria2c_file + (multi_th ? multi_th_end : '') + ' out=' + fn);
 
             download_btn.attr({
                 href: url,
@@ -319,20 +345,31 @@
                 href: aria2c_file_inline,
                 download: fn + '.aria2c'
             });
+
+            aria2c_mt_btn[multi_th ? 'addClass' : 'removeClass']('enabled');
+        };
+
+        input.on('input', generate_links);
+
+        aria2c_mt_btn.click(() => {
+            multi_th = !multi_th;
+            generate_links();
         });
-        input.trigger('input');
 
         req_download_panel
             .append(input)
             .append(open_btn)
             .append(download_btn)
-            .append(aria2c_btn);
+            .append(aria2c_btn)
+            .append(aria2c_mt_btn);
 
         req_block
             .append(req_details.url + '<br/><br/>');
         req_details.requestHeaders.forEach(function(header) {
             req_block.append('<b>' + header.name + ':</b> ' + header.value + '<br/>');
         });
+
+        generate_links();
     }
 
     function guessFileName(title, url) {
@@ -358,27 +395,49 @@
 
     function prependCompletedBlock(req_details) { }
 
+    var filterLeadings = {
+        reqId:  'requestId',
+        id:     'requestId',
+        method: 'method',
+        m:      'method',
+        type:   'type',
+        t:      'type',
+        URL:    'url',
+        url:    'url',
+        u:      'url',
+        '':     'url',
+    };
+
     function filterChanged() {
         chrome.storage.local.set({
             filter: filterInput.val()
         });
 
         // filter machanism can be complicated, pre-compile it into a callable
-        var token_list = filterInput.val().split(/\s+/)
-            .filter(function(token){
-                return token !== '';
-            });
-        if (token_list.length === 0) {
+        var val = filterInput.val();
+        if (val === '')
             filterQ = null;
-        } else {
-            filterQ = function(url) {
-                var matched = true;
-                token_list.forEach(function(token) {
-                    matched = url.indexOf(token) > -1 && matched;
-                });
-                return matched;
-            };
-        }
+        else
+            try {
+                // Legal query should be a space-seperated token list,
+                // with each token of form 'ld:regex', where ld is in 'filterLeadings'.
+                var pat_list = val.split(/\s+/)
+                    .filter(pair => pair !== '')
+                    .map(pair => {
+                        var c = pair.indexOf(':');
+                        var fld = filterLeadings[pair.substr(0, c)];
+                        if (fld === undefined) throw new SyntaxError('field not found');
+                        return [fld, new RegExp(pair.substr(c + 1))];
+                    });
+                filterQ = req_data => {
+                    var his = req_data.history;
+                    var req_details = his[his.length - 1];
+                    return pat_list.reduce((m, [fld, re]) => m && re.exec(req_details[fld]), true);
+                };
+            } catch (e) {
+                if (e instanceof SyntaxError) return filterInput.addClass('error');
+                else throw e;
+            }
 
         // Use .detach() to keep event handler of rows
         requestsTable.find('tr').detach();
@@ -390,6 +449,8 @@
 
         tryAutoSelectSingleRow();
         updateControlInfo();
+
+        filterInput.removeClass('error');
     }
 
     init();
